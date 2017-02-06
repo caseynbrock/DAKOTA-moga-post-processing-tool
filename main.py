@@ -8,7 +8,7 @@
 import optimization_results as optr
 
 def main():
-    a4 = optr.MogaOptimizationResults('.')
+    a4 = optr.MogaOptimizationResults()
     print a4.gen_size_list
     print a4.pareto_front
 

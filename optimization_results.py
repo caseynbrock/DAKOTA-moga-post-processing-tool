@@ -7,6 +7,10 @@
 # WARNING: design point numbers 0-indexed in pandas database, but 
 # eval_id column is the original 1-indexed value given by DAKOTA
 #
+# By default, looks for 'JEGAGlobal.log' and 'pp_moga.log' in current
+# directory, but other files can be specified
+# 
+# 
 #
 # 
 # The MIT License
@@ -37,17 +41,13 @@
 import numpy as np
 import pandas as pd
 
-### USER PARAMETERS
-logfile_name = 'JEGAGlobal.log'
-logfile_name = 'pp_moga.log'
-dakota_tabular_filename = 'dakota_tabular.dat'
-###################
 
 class MogaOptimizationResults(object):
     # panda database along with several other attributes of the results
-    def __init__(self, output_files_directory):
-        self.all_design_points_db = pd.read_csv(dakota_tabular_filename, 
-                                                delim_whitespace=True)
+    def __init__(self, global_log='JEGAGlobal.log', dakota_tabular_log='dakota_tabular.dat'):
+        self.global_log = global_log
+        self.dakota_tabular_log = dakota_tabular_log
+        self.all_design_points_db = pd.read_csv(self.dakota_tabular_log, delim_whitespace=True)
         self.gen_size_list = self._get_gen_sizes()
         self._add_gen_numbers()
         self.pareto_front = self._get_pareto_fronts()
@@ -55,7 +55,7 @@ class MogaOptimizationResults(object):
     def _get_gen_sizes(self):
         """ read generation sizes from JEGA log or DAKOTA's stdout """
         gens = []
-        with open(logfile_name) as fin:
+        with open(self.global_log) as fin:
             for line in fin:
                 if 'evaluations so far.' in line:
                     gens.append(int(line.split()[-4]) - sum(gens))
