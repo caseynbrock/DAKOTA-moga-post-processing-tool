@@ -38,6 +38,7 @@ import numpy as np
 import pandas as pd
 
 ### USER PARAMETERS
+logfile_name = 'JEGAGlobal.log'
 logfile_name = 'pp_moga.log'
 dakota_tabular_filename = 'dakota_tabular.dat'
 ###################
@@ -52,11 +53,14 @@ class MogaOptimizationResults(object):
         self.pareto_front = self._get_pareto_fronts()
         
     def _get_gen_sizes(self):
+        """ read generation sizes from JEGA log or DAKOTA's stdout """
         gens = []
         with open(logfile_name) as fin:
             for line in fin:
                 if 'evaluations so far.' in line:
                     gens.append(int(line.split()[-4]) - sum(gens))
+                if 'Global Log ' in line:
+                    gens = []  # restart gen list if optimization was restarted
         return gens
 
     def _add_gen_numbers(self):
