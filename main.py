@@ -1,26 +1,38 @@
-# read_log.m
+# main.py
 #
-# reads output files from a moga run.
-# the created arrays can then be used by another script for plot 
+# reads output files from DAKOTA moga run and packages data into a class.
+# The class can then be used by another script for plotting
 # or further post processing
 #
-# design_var_names: array of design variable names 
-# design_vars: design variable values for all design points (size n by n_vars)
-# accu: accuracy objectives of all design points
-# work: work objectives of all design points
-# n: number of design points 
-# 
-# vars_final: design variable values for pareto front (size n_final x n_vars)
-# accu_final: accuracy objectives of all pareto points
-# work_final: work objectives of all pareto points
-# n_final: number of pareto points
+# WARNING: design point numbers 0-indexed in pandas database, but 
+# eval_id column is the original 1-indexed value given by DAKOTA
 #
-# gens: generation number of each design point (array size nx1)
-# the design points are grouped into generations
-
-# edit to include atan AND work objectives
-# generation numbers start at 0
-# WARNING: design point numbers 0 indexed in pandas database, but 1st column is the original 1 indexed value given by DAKOTA
+#
+# 
+# The MIT License
+# 
+# Copyright (c) 2011 Dominic Tarr
+# 
+# Permission is hereby granted, free of charge, 
+# to any person obtaining a copy of this software and 
+# associated documentation files (the "Software"), to 
+# deal in the Software without restriction, including 
+# without limitation the rights to use, copy, modify, 
+# merge, publish, distribute, sublicense, and/or sell 
+# copies of the Software, and to permit persons to whom 
+# the Software is furnished to do so, 
+# subject to the following conditions:
+# 
+# The above copyright notice and this permission notice 
+# shall be included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, 
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR 
+# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import numpy as np
 import pandas as pd
@@ -56,8 +68,8 @@ class JegaOptimizationResults(object):
 
     def _get_pareto_fronts(self):
         # find pareto front at each generation        
-        pf = pareto_frontier(self.all_design_points_db, 'obj_fn_1', 'obj_fn_2')
-
+        pfront = pareto_frontier(self.all_design_points_db, 'obj_fn_1', 'obj_fn_2')
+        return pfront
 
 
 def pareto_frontier(df, obj1='obj_fn_1', obj2='obj_fn_2'):
@@ -80,27 +92,10 @@ def pareto_frontier(df, obj1='obj_fn_1', obj2='obj_fn_2'):
 
 def main():
     a4 = JegaOptimizationResults('.')
-    #print a4.all_design_points_db.iloc[0]
-    #print a4.all_design_points_db
     print a4.gen_size_list
-    print 'calculating pareto front'
     print a4.pareto_front
-    print 'done'
-    #print a4.pareto_front
-    # all pareto fronts (list or what?)
-    # all generations (list or what?)
 
-    # # read pareto front data
-    # A2 = load('finaldata1.dat');
-    # # Ga_rc_final = A2(:,1);
-    # # As_rc_final = A2(:,2);
-    # # Ga_ed_final = A2(:,3);
-    # # As_ed_final = A2(:,4);
-    # vars_final  = A2(:,1:n_vars);
-    # accu_final  = A2(:,5);
-    # work_final  = A2(:,6);
-    # n_final=length(work_final);
-     
+    ### OLD MATLAB CODE I NEED TO REWORK ### 
     # # read force and atan accuracy objectives from 
     # # all_accuracy_objectives.dat
     # A3 = load('all_accuracy_objectives.dat');
@@ -108,8 +103,6 @@ def main():
     # force_objs = A3(:,2);
     # atan_objs = A3(:,3);
     # n3 = length(A3(:,1));
-     
-     
 
 
 if __name__=='__main__':
