@@ -49,7 +49,7 @@ class JegaOptimizationResults(object):
                                                 delim_whitespace=True)
         self.gen_size_list = self._get_gen_sizes()
         self._add_gen_numbers()
-        self._get_pareto_fronts()
+        pareto_front = self._get_pareto_fronts()
         
     def _get_gen_sizes(self):
         gens = []
@@ -67,7 +67,7 @@ class JegaOptimizationResults(object):
         self.all_design_points_db['generation'] = gen_index_list
 
     def _get_pareto_fronts(self):
-        # find pareto front at each generation        
+        """ find pareto front """
         pfront = pareto_frontier(self.all_design_points_db, 'obj_fn_1', 'obj_fn_2')
         return pfront
 
