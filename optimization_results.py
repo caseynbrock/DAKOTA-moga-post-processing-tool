@@ -47,7 +47,7 @@ class MogaOptimizationResults(object):
     def __init__(self, global_log='JEGAGlobal.log', dakota_tabular_log='dakota_tabular.dat'):
         self.global_log = global_log
         self.dakota_tabular_log = dakota_tabular_log
-        self.all_design_points_db = pd.read_csv(self.dakota_tabular_log, delim_whitespace=True)
+        self.all_design_points_db = pd.read_csv(self.dakota_tabular_log, delimiter=r'\s+')
         self.gen_size_list = self._get_gen_sizes()
         self._add_gen_numbers()
         self.pareto_front = self._get_pareto_fronts()
