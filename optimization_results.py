@@ -86,7 +86,7 @@ def pareto_frontier(df, obj1='obj_fn_1', obj2='obj_fn_2'):
     retained from the all points data frame.
     This could be optimized a lot better.
     """
-    sorted_df = df.sort_values([obj1, obj2])
+    sorted_df = df.sort([obj1, obj2])
     pareto_front = sorted_df.iloc[[0]].copy()  # initialize pareto front
     for i in sorted_df.index[1:]:
         if sorted_df.loc[i].obj_fn_2 < pareto_front.iloc[-1].obj_fn_2:
