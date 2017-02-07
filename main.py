@@ -11,6 +11,10 @@ def main():
     a4 = optr.MogaOptimizationResults()
     print a4.gen_size_list
     print a4.pareto_front
+    assert a4.gen_size_list == [100, 94, 48, 45, 45, 46, 62, 85, 102, 108, 131, 130, 134, 119, 
+                                127, 128, 155, 124, 124, 130, 128, 123, 137, 135, 149, 165, 154, 
+                                164, 169, 177, 205, 196, 215, 185, 205, 190, 162, 158, 154, 159, 
+                                163, 183, 175, 183, 186, 188, 188, 186, 201, 213, 222]
 
     ### OLD MATLAB CODE I NEED TO REWORK ### 
     # # read force and atan accuracy objectives from 
