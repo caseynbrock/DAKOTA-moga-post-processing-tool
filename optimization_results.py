@@ -22,11 +22,7 @@
 # associated documentation files (the "Software"), to 
 # deal in the Software without restriction, including 
 # without limitation the rights to use, copy, modify, 
-# merge, publish, distribute, sublicense, and/or sell 
-# copies of the Software, and to permit persons to whom 
-# the Software is furnished to do so, 
-# subject to the following conditions:
-# 
+# merge, publish, distribute, sublicense, and/or sell # copies of the Software, and to permit persons to whom # the Software is furnished to do so, # subject to the following conditions: # 
 # The above copyright notice and this permission notice 
 # shall be included in all copies or substantial portions of the Software.
 # 
@@ -40,14 +36,18 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class MogaOptimizationResults(object):
     # panda database along with several other attributes of the results
-    def __init__(self, global_log='JEGAGlobal.log', dakota_tabular_log='dakota_tabular.dat'):
+    def __init__(self, global_log='JEGAGlobal.log', dakota_tabular_log='dakota_tabular.dat',
+                 truncate=None):
         self.global_log = global_log
         self.dakota_tabular_log = dakota_tabular_log
-        self.all_design_points_db = pd.read_csv(self.dakota_tabular_log, delimiter=r'\s+')
+        self.all_points = pd.read_csv(self.dakota_tabular_log, delimiter=r'\s+')
+        if truncate != None:
+            self._truncate_high_objectives(truncate[0], truncate[1])
         self.gen_size_list = self._get_gen_sizes()
         self._add_gen_numbers()
         self.pareto_front = self._get_pareto_fronts()
@@ -68,12 +68,62 @@ class MogaOptimizationResults(object):
         gen_index_list = [] #labels each design point with its generation number
         for i, gen_size in enumerate(self.gen_size_list):
             gen_index_list += gen_size*[i]
-        self.all_design_points_db['generation'] = gen_index_list
+        self.all_points['generation'] = gen_index_list
 
     def _get_pareto_fronts(self):
         """ find pareto front """
-        pfront = pareto_frontier(self.all_design_points_db, 'obj_fn_1', 'obj_fn_2')
+        pfront = pareto_frontier(self.all_points, 'obj_fn_1', 'obj_fn_2')
         return pfront
+
+    def _truncate_high_objectives(self, obj1_thresh, obj2_thresh):
+        """ sets design points with objectives above a threshhold
+        as NaN.
+        I added this because sometimes I return artificially high
+        objectives to DAKOTA as error codes, and I don't need these
+        for post-processing.
+        """
+        # don't completely remove the lines because that will mess up
+        # processing based on generation sizes
+        trunc_indices_1 = self.all_points[self.all_points['obj_fn_1']>obj1_thresh].index
+        trunc_indices_2 = self.all_points[self.all_points['obj_fn_2']>obj2_thresh].index
+        self.all_points = self.all_points.set_value(trunc_indices_1, ['obj_fn_1'], None)
+        self.all_points = self.all_points.set_value(trunc_indices_2, ['obj_fn_2'], None)
+
+    def plot_design_space(self):
+        """ quick densty plot of design space and pareto front. 
+        Not flexible yet 
+        """
+        xbins = 10**np.linspace(-3, 0, 200)
+        ybins = 10**np.linspace(-2, 0, 200)
+        counts, _, _ = np.histogram2d(self.all_points['obj_fn_1'], self.all_points['obj_fn_2'], 
+                                      bins=(xbins, ybins))
+        # needs to be rotated and flipped # also mask out 0s 
+        counts = np.rot90(counts)
+        counts = np.flipud(counts)
+        counts = np.ma.masked_where(counts==0,counts)
+
+        # design space        
+        fig, ax = plt.subplots()
+        #ax.pcolormesh(xbins, ybins, counts, cmap='hot')
+        ax.pcolormesh(xbins, ybins, counts)
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        # pareto front
+        plt.plot(self.pareto_front['obj_fn_1'], self.pareto_front['obj_fn_2'], 'r-')
+
+        plt.xlabel('objective function 1')
+        plt.ylabel('objective function 2')
+        plt.grid(True, which="both")
+        
+    def plot_pareto_front(self):
+        """ plot just the pareto front """
+        plt.plot(self.pareto_front['obj_fn_1'], self.pareto_front['obj_fn_2'], 'r.-')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.xlabel('objective function 1')
+        plt.ylabel('objective function 2')
+        plt.grid(True, which="both")
 
 
 def pareto_frontier(df, obj1='obj_fn_1', obj2='obj_fn_2'):
