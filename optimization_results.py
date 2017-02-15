@@ -89,7 +89,7 @@ class MogaOptimizationResults(object):
         self.all_points = self.all_points.set_value(trunc_indices_1, ['obj_fn_1'], None)
         self.all_points = self.all_points.set_value(trunc_indices_2, ['obj_fn_2'], None)
 
-    def plot_design_space(self):
+    def plot_objective_space(self, legend_label=None):
         """ quick densty plot of design space and pareto front. 
         Not flexible yet 
         """
@@ -110,11 +110,13 @@ class MogaOptimizationResults(object):
         ax.set_yscale('log')
 
         # pareto front
-        plt.plot(self.pareto_front['obj_fn_1'], self.pareto_front['obj_fn_2'], 'r-')
+        plt.plot(self.pareto_front['obj_fn_1'], self.pareto_front['obj_fn_2'], 'r-', 
+                 label=legend_label)
 
         plt.xlabel('objective function 1')
         plt.ylabel('objective function 2')
         plt.grid(True, which="both")
+        return fig, ax
         
     def plot_pareto_front(self):
         """ plot just the pareto front """
